@@ -118,4 +118,24 @@ public class QuerydslBasicTest {
                 .selectFrom(member)
                 .fetchCount();
     }
+
+    @Test
+    public void sort() {
+        em.persist(new Member(null, 100));
+        em.persist(new Member("member5", 100));
+        em.persist(new Member("member6", 100));
+
+        final List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(100))
+                .orderBy(member.age.desc(), member.username.asc().nullsLast())
+                .fetch();
+
+        final Member member5 = result.get(0);
+        final Member member6 = result.get(1);
+        final Member memberNull = result.get(2);
+        Assertions.assertThat(member5.getUsername()).isEqualTo("member5");
+        Assertions.assertThat(member6.getUsername()).isEqualTo("member6");
+        Assertions.assertThat(memberNull.getUsername()).isNull();
+    }
 }
